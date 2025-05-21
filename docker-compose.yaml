@@ -1,0 +1,29 @@
+services:
+  app:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile.dev
+    volumes:
+      - ./:/app
+    ports:
+      - 8080:8080
+    depends_on:
+      - nats-js
+      - crdb
+
+  nats-js:
+    image: nats:2.10-scratch
+    ports:
+      - 4222:4222
+    command: "-js"
+  crdb:
+    image: cockroachdb/cockroach:v24.2.3
+    ports:
+      - "26257:26257"
+      - "8090:8080"
+    command: start-single-node --insecure
+    volumes:
+      - "db:/cockroach/cockroach-data"
+
+volumes:
+  db:

@@ -1,0 +1,30 @@
+{
+	"roles": {
+		"unauthorized": "Rol no autorizado"
+	},
+	"unauthorized": "No tienes acceso",
+	"server": {
+		"internal_error": "Error del servidor",
+		"db_error": "Error del servidor"
+	},
+	"form": {
+		"error": "Error en el formulario",
+		"required": "Requerido",
+		"min": "Mínimo"
+	},
+	"auth": {
+		"err_credentials": "Credenciales inválidas",
+		"unable_role": "No se puede registrar con este rol",
+		"exists_email_or_username": "Ya existe el email o el nombre de usuario",
+		"code_not_valid": "El codigo no es valido",
+		"token_not_valid": "El token no es valido"
+	},
+	"refresh_not_found": "No se encuentra el Header X-Refresh",
+	"session": {
+		"not_exists": "La sesión ya no existe"
+	},
+	"user": {
+		"not_found": "El usuario no existe",
+		"username_not_exists": "No existe el nombre de usuario"
+	}
+}

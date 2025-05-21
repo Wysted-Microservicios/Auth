@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "cockroachdb"
+  url      = env("DATABASE_URL")
+}
+
+model accesses {
+  id         BigInt   @id @default(sequence())
+  token      String
+  expires_at DateTime @db.Date
+  is_revoked Boolean  @default(false)
+  id_session BigInt
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  sessions   sessions @relation(fields: [id_session], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model auths {
+  id         BigInt     @id @default(sequence())
+  password   String
+  id_user    BigInt     @unique
+  created_at DateTime   @default(now()) @db.Timestamp(6)
+  users      users      @relation(fields: [id_user], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sessions   sessions[]
+}
+
+model roles_users {
+  id         BigInt    @id @default(sequence())
+  id_user    BigInt
+  role       role_name
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  users      users     @relation(fields: [id_user], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model sessions {
+  id         BigInt     @id @default(sequence())
+  token      String
+  id_auth    BigInt
+  device     String?
+  ip         String?
+  browser    String?
+  location   String?
+  expires_at DateTime   @db.Date
+  created_at DateTime   @default(now()) @db.Timestamp(6)
+  accesses   accesses[]
+  auths      auths      @relation(fields: [id_auth], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  id                BigInt               @id @default(sequence())
+  email             String               @unique
+  name              String
+  username 			String @unique
+  phone             String?
+  created_at        DateTime            @default(now()) @db.Timestamp(6)
+  auths             auths[]
+  roles_users       roles_users[]
+  recovery_codes    recovery_codes[]
+  recovery_tokens 	recovery_tokens[]
+}
+
+model recovery_codes {
+  id          BigInt    @id @default(sequence())
+  code        String
+  id_user     BigInt
+  is_active   Boolean   @default(true)
+  expires_at  DateTime  @db.Timestamp(6)
+  created_at  DateTime  @default(now()) @db.Timestamp(6)
+
+  users       users     @relation(fields: [id_user], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model recovery_tokens {
+  id         BigInt   @id @default(sequence())
+  token      String   @unique
+  id_user    BigInt
+  is_used    Boolean  @default(false)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  expires_at DateTime @db.Timestamp(6)
+
+  users      users    @relation(fields: [id_user], references: [id], onDelete: Cascade)
+}
+
+
+enum role_name {
+  admin
+  user
+}
