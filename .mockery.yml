@@ -1,0 +1,11 @@
+template: testify
+recursive: true
+all: true
+
+packages:
+    ./src:
+        config:
+            dir: ./tests/mocks
+            structname: Mock{{.InterfaceName}}
+            filename: "{{.InterfaceName }}_mock.go"
+            pkgname: mocks

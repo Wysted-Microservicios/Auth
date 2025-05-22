@@ -10,14 +10,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type authService struct {
+type AuthService struct {
 	authRepository          auth_repository.AuthRepository
 	userRepository          user_repository.UserRepository
 	recoveryTokenService    RecoveryTokenService
 	recoteryTokenRepository recovery_tokens_repository.RecoveryTokenRepository
 }
 
-func (authService *authService) Register(
+func (authService *AuthService) Register(
 	registerDto *dto.RegisterDto,
 ) error {
 	user, err := registerDto.ToModel()
@@ -44,7 +44,7 @@ func (authService *authService) Register(
 	return err
 }
 
-func (authService *authService) Login(authDto dto.AuthDto) (*model.User, int64, error) {
+func (authService *AuthService) Login(authDto dto.AuthDto) (*model.User, int64, error) {
 	auth, err := authService.authRepository.FindOneByUsername(authDto.Username)
 	if err != nil {
 		return nil, 0, utils.ErrRepositoryFailed
@@ -70,13 +70,14 @@ func (authService *authService) Login(authDto dto.AuthDto) (*model.User, int64, 
 	return user, auth.ID, nil
 }
 
-func (authService *authService) ChangePassword(changePasswordDto dto.ChangePassword) error {
+func (authService *AuthService) ChangePassword(changePasswordDto dto.ChangePassword) error {
+	if changePasswordDto.Password != changePasswordDto.ConfirmPassword {
+		return ErrInvalidCredentials
+	}
+
 	tokenData, err := authService.recoveryTokenService.CheckToken(changePasswordDto.Token)
 	if err != nil {
 		return err
-	}
-	if changePasswordDto.Password != changePasswordDto.ConfirmPassword {
-		return ErrInvalidCredentials
 	}
 	err = authService.authRepository.UpdateOne(tokenData.IDUser, &auth_repository.AuthDataUpdate{
 		Password: changePasswordDto.Password,
@@ -99,8 +100,8 @@ func NewAuthService(
 	recoveryTokenService RecoveryTokenService,
 	recoteryTokenRepository recovery_tokens_repository.RecoveryTokenRepository,
 
-) *authService {
-	return &authService{
+) *AuthService {
+	return &AuthService{
 		authRepository:          authRepository,
 		userRepository:          userRepository,
 		recoveryTokenService:    recoveryTokenService,

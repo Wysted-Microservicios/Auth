@@ -34,7 +34,7 @@ func (userService *UserService) GetUserIDFromUsername(username string) (int64, e
 func (userService *UserService) GetUserById(idUser int64) (*model.User, error) {
 	user, err := userService.userRepository.FindOneByID(idUser)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 	if user == nil {
 		return nil, ErrUserNotFound
