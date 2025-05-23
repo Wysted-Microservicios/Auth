@@ -21,11 +21,19 @@ var (
 
 	AUTH_DATA_UPDATE string = "*auth_repository.AuthDataUpdate"
 
+	SESSION_CRITERIA_PTR string = "*session_repository.SessionCriteria"
+	SESSION_DATA_UPDATE  string = "session_repository.SessionUpdateData"
+
+	ACCESS_CRITERIA_PTR string = "*access_repository.AccessCriteria"
+	ACCESS_DATA_UPDATE  string = "access_repository.AccessUpdateData"
+
 	USER_MODEL_PTR       string = "*model.User"
 	USER_MODEL           string = "model.User"
 	RECOVERY_MODEL       string = "model.Recovery"
 	RECOVERY_MODEL_PTR   string = "*model.Recovery"
 	RECOVERY_TOKEN_MODEL string = "model.RecoveryToken"
+	SESSION_MODEL        string = "model.Session"
+	ACCESS_MODEL         string = "model.Access"
 
 	STRING_ARRAY string = "[]string"
 	STRING       string = "string"
@@ -49,6 +57,8 @@ var (
 	DELETE                  string = "Delete"
 	CHECK_TOKEN             string = "CheckToken"
 	NEW_RECOVERY_CODE_TOKEN string = "NewRecoveryCodeToken"
+	NEW_SESSION_TOKEN       string = "NewSessionToken"
+	NEW_ACCESS_TOKEN        string = "NewAccessToken"
 )
 
 // Datos ficticios para modelos y dto's
@@ -148,6 +158,12 @@ var (
 		CreatedAt:  Time_1,
 	}
 
+	Session_1 model.Session = model.Session{
+		Token:     Token_1,
+		IDAuth:    ID_1,
+		ExpiresAt: Time_3,
+	}
+
 	// Dto's
 	RegisterDto_1 *dto.RegisterDto = &dto.RegisterDto{
 		Name:     Name_1,
@@ -176,4 +192,6 @@ var (
 		Email: Email_1,
 		Code:  Code_1,
 	}
+
+	SessionDto dto.SessionDto = dto.SessionDto{}
 )

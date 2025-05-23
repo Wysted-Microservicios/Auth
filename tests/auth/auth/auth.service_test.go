@@ -29,7 +29,7 @@ func TestMain(m *testing.M) {
 	mockRecoveryTokenRepo = &mocks.MockRecoveryTokenRepository{}
 	mockAuthRepo = &mocks.MockAuthRepository{}
 
-	RecoveryTokenS = service.NewRecoveryTokenService(mockRecoveryTokenRepo, mockTokenGeneratorRepo)
+	RecoveryTokenS = service.NewRecoveryTokenService(mockRecoveryTokenRepo, mockTokenGeneratorRepo, mockUserRepo)
 
 	AuthS = service.NewAuthService(mockAuthRepo, mockUserRepo, *RecoveryTokenS, mockRecoveryTokenRepo)
 

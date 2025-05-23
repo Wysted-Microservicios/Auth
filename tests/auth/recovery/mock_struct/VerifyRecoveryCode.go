@@ -6,6 +6,7 @@ type VerifyRecoveryCodeRepository struct {
 	FindOneByEmail         *model.User
 	RecoveryExists         bool
 	RecoveryFindOne        *model.Recovery
+	UserExists             bool
 	RecoveryTokenGenerator string
 	RecoveryTokenInsertOne *model.RecoveryToken
 }
@@ -16,6 +17,7 @@ type VerifyRecoveryCodeExpectedReturns struct {
 	RepoError_4      error
 	RepoError_5      error
 	RepoError_6      error
+	RepoError_7      error
 	ExpectedReturn_1 bool
 	ExpectedReturn_2 string
 	ExpectedError    error

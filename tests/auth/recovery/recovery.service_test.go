@@ -29,7 +29,7 @@ func TestMain(m *testing.M) {
 	mockRecoveryTokenRepo = &mocks.MockRecoveryTokenRepository{}
 	mockRecoveryRepo = &mocks.MockRecoveryRepository{}
 
-	TokenS = service.NewRecoveryTokenService(mockRecoveryTokenRepo, mockTokenGeneratorRepo)
+	TokenS = service.NewRecoveryTokenService(mockRecoveryTokenRepo, mockTokenGeneratorRepo, mockUserRepo)
 
 	RecoveryS = service.NewRecoveryService(mockRecoveryRepo, mockUserRepo, *TokenS)
 
@@ -144,6 +144,7 @@ func TestVerifyRecoveryCode(t *testing.T) {
 			FindOneByEmail         *model.User
 			RecoveryExists         bool
 			RecoveryFindOne        *model.Recovery
+			UserExists             bool
 			RecoveryTokenGenerator string
 			RecoveryTokenInsertOne *model.RecoveryToken
 		}
@@ -154,6 +155,7 @@ func TestVerifyRecoveryCode(t *testing.T) {
 			RepoError_4      error
 			RepoError_5      error
 			RepoError_6      error
+			RepoError_7      error
 			ExpectedReturn_1 bool
 			ExpectedReturn_2 string
 			ExpectedError    error
@@ -166,6 +168,7 @@ func TestVerifyRecoveryCode(t *testing.T) {
 				FindOneByEmail:         tests.User_1,
 				RecoveryExists:         true,
 				RecoveryFindOne:        tests.RecoveryCode_1,
+				UserExists:             true,
 				RecoveryTokenGenerator: tests.Token_1,
 				RecoveryTokenInsertOne: tests.RecoveryToken_1,
 			},
@@ -176,6 +179,7 @@ func TestVerifyRecoveryCode(t *testing.T) {
 				RepoError_4:      nil,
 				RepoError_5:      nil,
 				RepoError_6:      nil,
+				RepoError_7:      nil,
 				ExpectedReturn_1: true,
 				ExpectedReturn_2: tests.Token_1,
 				ExpectedError:    nil,
@@ -188,6 +192,7 @@ func TestVerifyRecoveryCode(t *testing.T) {
 				FindOneByEmail:         nil,
 				RecoveryExists:         false,
 				RecoveryFindOne:        nil,
+				UserExists:             false,
 				RecoveryTokenGenerator: "",
 				RecoveryTokenInsertOne: nil,
 			},
@@ -198,6 +203,7 @@ func TestVerifyRecoveryCode(t *testing.T) {
 				RepoError_4:      nil,
 				RepoError_5:      nil,
 				RepoError_6:      nil,
+				RepoError_7:      nil,
 				ExpectedReturn_1: false,
 				ExpectedReturn_2: "",
 				ExpectedError:    service.ErrUserLoginNotFound,
@@ -210,6 +216,7 @@ func TestVerifyRecoveryCode(t *testing.T) {
 				FindOneByEmail:         tests.User_1,
 				RecoveryExists:         false,
 				RecoveryFindOne:        nil,
+				UserExists:             false,
 				RecoveryTokenGenerator: "",
 				RecoveryTokenInsertOne: nil,
 			},
@@ -220,6 +227,7 @@ func TestVerifyRecoveryCode(t *testing.T) {
 				RepoError_4:      nil,
 				RepoError_5:      nil,
 				RepoError_6:      nil,
+				RepoError_7:      nil,
 				ExpectedReturn_1: false,
 				ExpectedReturn_2: "",
 				ExpectedError:    service.ErrCodeNotValid,
@@ -232,6 +240,7 @@ func TestVerifyRecoveryCode(t *testing.T) {
 				FindOneByEmail:         tests.User_1,
 				RecoveryExists:         true,
 				RecoveryFindOne:        tests.RecoveryCode_2,
+				UserExists:             false,
 				RecoveryTokenGenerator: "",
 				RecoveryTokenInsertOne: nil,
 			},
@@ -242,9 +251,34 @@ func TestVerifyRecoveryCode(t *testing.T) {
 				RepoError_4:      nil,
 				RepoError_5:      nil,
 				RepoError_6:      nil,
+				RepoError_7:      nil,
 				ExpectedReturn_1: false,
 				ExpectedReturn_2: "",
 				ExpectedError:    service.ErrCodeNotValid,
+			},
+		},
+		{
+			Name:               "User not found",
+			VerifyRecoveryCode: tests.VerifyRecoveryCode_1,
+			Repository: mock_struct.VerifyRecoveryCodeRepository{
+				FindOneByEmail:         tests.User_1,
+				RecoveryExists:         true,
+				RecoveryFindOne:        tests.RecoveryCode_1,
+				UserExists:             false,
+				RecoveryTokenGenerator: "",
+				RecoveryTokenInsertOne: nil,
+			},
+			ExpectedReturns: mock_struct.VerifyRecoveryCodeExpectedReturns{
+				RepoError_1:      nil,
+				RepoError_2:      nil,
+				RepoError_3:      nil,
+				RepoError_4:      nil,
+				RepoError_5:      nil,
+				RepoError_6:      nil,
+				RepoError_7:      nil,
+				ExpectedReturn_1: false,
+				ExpectedReturn_2: "",
+				ExpectedError:    service.ErrUserNotFound,
 			},
 		},
 		{
@@ -254,6 +288,7 @@ func TestVerifyRecoveryCode(t *testing.T) {
 				FindOneByEmail:         nil,
 				RecoveryExists:         false,
 				RecoveryFindOne:        nil,
+				UserExists:             false,
 				RecoveryTokenGenerator: "",
 				RecoveryTokenInsertOne: nil,
 			},
@@ -264,6 +299,7 @@ func TestVerifyRecoveryCode(t *testing.T) {
 				RepoError_4:      nil,
 				RepoError_5:      nil,
 				RepoError_6:      nil,
+				RepoError_7:      nil,
 				ExpectedReturn_1: false,
 				ExpectedReturn_2: "",
 				ExpectedError:    utils.ErrRepositoryFailed,
@@ -320,6 +356,7 @@ func TestVerifyRecoveryCode(t *testing.T) {
 				FindOneByEmail:         tests.User_1,
 				RecoveryExists:         true,
 				RecoveryFindOne:        tests.RecoveryCode_1,
+				UserExists:             false,
 				RecoveryTokenGenerator: "",
 				RecoveryTokenInsertOne: nil,
 			},
@@ -330,6 +367,31 @@ func TestVerifyRecoveryCode(t *testing.T) {
 				RepoError_4:      utils.ErrRepositoryFailed,
 				RepoError_5:      nil,
 				RepoError_6:      nil,
+				RepoError_7:      nil,
+				ExpectedReturn_1: false,
+				ExpectedReturn_2: "",
+				ExpectedError:    utils.ErrRepositoryFailed,
+			},
+		},
+		{
+			Name:               "UserExists RepositoryFailed",
+			VerifyRecoveryCode: tests.VerifyRecoveryCode_1,
+			Repository: mock_struct.VerifyRecoveryCodeRepository{
+				FindOneByEmail:         tests.User_1,
+				RecoveryExists:         true,
+				RecoveryFindOne:        tests.RecoveryCode_1,
+				UserExists:             false,
+				RecoveryTokenGenerator: "",
+				RecoveryTokenInsertOne: nil,
+			},
+			ExpectedReturns: mock_struct.VerifyRecoveryCodeExpectedReturns{
+				RepoError_1:      nil,
+				RepoError_2:      nil,
+				RepoError_3:      nil,
+				RepoError_4:      nil,
+				RepoError_5:      utils.ErrRepositoryFailed,
+				RepoError_6:      nil,
+				RepoError_7:      nil,
 				ExpectedReturn_1: false,
 				ExpectedReturn_2: "",
 				ExpectedError:    utils.ErrRepositoryFailed,
@@ -342,6 +404,7 @@ func TestVerifyRecoveryCode(t *testing.T) {
 				FindOneByEmail:         tests.User_1,
 				RecoveryExists:         true,
 				RecoveryFindOne:        tests.RecoveryCode_1,
+				UserExists:             true,
 				RecoveryTokenGenerator: "",
 				RecoveryTokenInsertOne: nil,
 			},
@@ -350,8 +413,9 @@ func TestVerifyRecoveryCode(t *testing.T) {
 				RepoError_2:      nil,
 				RepoError_3:      nil,
 				RepoError_4:      nil,
-				RepoError_5:      utils.ErrRepositoryFailed,
-				RepoError_6:      nil,
+				RepoError_5:      nil,
+				RepoError_6:      utils.ErrRepositoryFailed,
+				RepoError_7:      nil,
 				ExpectedReturn_1: false,
 				ExpectedReturn_2: "",
 				ExpectedError:    utils.ErrRepositoryFailed,
@@ -364,6 +428,7 @@ func TestVerifyRecoveryCode(t *testing.T) {
 				FindOneByEmail:         tests.User_1,
 				RecoveryExists:         true,
 				RecoveryFindOne:        tests.RecoveryCode_1,
+				UserExists:             true,
 				RecoveryTokenGenerator: tests.Token_1,
 				RecoveryTokenInsertOne: nil,
 			},
@@ -373,7 +438,8 @@ func TestVerifyRecoveryCode(t *testing.T) {
 				RepoError_3:      nil,
 				RepoError_4:      nil,
 				RepoError_5:      nil,
-				RepoError_6:      utils.ErrRepositoryFailed,
+				RepoError_6:      nil,
+				RepoError_7:      utils.ErrRepositoryFailed,
 				ExpectedReturn_1: false,
 				ExpectedReturn_2: "",
 				ExpectedError:    utils.ErrRepositoryFailed,
@@ -404,14 +470,18 @@ func TestVerifyRecoveryCode(t *testing.T) {
 				mock.AnythingOfType(tests.RECOVERY_DATA_UPDATE),
 			).Return(tc.ExpectedReturns.RepoError_4)
 
+			mockUserRepo.On(tests.EXISTS,
+				mock.AnythingOfType(tests.USER_CRITERIA_PTR),
+			).Return(tc.Repository.UserExists, tc.ExpectedReturns.RepoError_5)
+
 			mockTokenGeneratorRepo.On(tests.NEW_RECOVERY_CODE_TOKEN,
 				mock.AnythingOfType(tests.TIME),
 				mock.AnythingOfType(tests.USER_MODEL),
-			).Return(tc.Repository.RecoveryTokenGenerator, tc.ExpectedReturns.RepoError_5)
+			).Return(tc.Repository.RecoveryTokenGenerator, tc.ExpectedReturns.RepoError_6)
 
 			mockRecoveryTokenRepo.On(tests.INSERT_ONE,
 				mock.AnythingOfType(tests.RECOVERY_TOKEN_MODEL),
-			).Return(tc.Repository.RecoveryTokenInsertOne, tc.ExpectedReturns.RepoError_6)
+			).Return(tc.Repository.RecoveryTokenInsertOne, tc.ExpectedReturns.RepoError_7)
 
 			result_1, result_2, err := RecoveryS.VerifyRecoveryCode(tc.VerifyRecoveryCode)
 
