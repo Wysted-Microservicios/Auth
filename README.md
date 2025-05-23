@@ -79,7 +79,4 @@ Esto creará en `src/package/db/models` todos los modelos de la base de datos en
 -   🔐 Iniciar sesión: Acceso al sistema para usuarios registrados.
 -   🔄 Cambiar contraseña: Opción para actualizar la contraseña actual del usuario.
 -   🚀 Compatibilidad con NATS: Integración para comunicación eficiente mediante el sistema de mensajería NATS.
-
-## Todo
-
--   🧪 Implementar tests
+-   🧪 Testing a todos los servicios y sus funciones

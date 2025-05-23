@@ -6,6 +6,7 @@ import (
 	"github.com/CPU-commits/Template_Go-EventDriven/src/auth/model"
 	"github.com/CPU-commits/Template_Go-EventDriven/src/auth/repository/recovery_tokens_repository"
 	"github.com/CPU-commits/Template_Go-EventDriven/src/auth/repository/token_generator_repository"
+	"github.com/CPU-commits/Template_Go-EventDriven/src/auth/repository/user_repository"
 	"github.com/CPU-commits/Template_Go-EventDriven/src/utils"
 )
 
@@ -16,11 +17,22 @@ const (
 type RecoveryTokenService struct {
 	recoveryTokenRepository recovery_tokens_repository.RecoveryTokenRepository
 	recoveryTokenGenerator  token_generator_repository.TokenGenerator
+	userRepository          user_repository.UserRepository
 }
 
 func (recoveryTokenService *RecoveryTokenService) NewRecoveryToken(user model.User) (string, error) {
 	expiredAt := time.Now().UTC().Add(maxRecoveryTokenTime)
 
+	exists, err := recoveryTokenService.userRepository.Exists(&user_repository.Criteria{
+		ID:    user.ID,
+		Email: user.Email,
+	})
+	if err != nil {
+		return "", err
+	}
+	if !exists {
+		return "", ErrUserNotFound
+	}
 	token, err := recoveryTokenService.recoveryTokenGenerator.NewRecoveryCodeToken(
 		expiredAt,
 		user,
@@ -86,17 +98,18 @@ func (recoveryTokenService *RecoveryTokenService) RecoveryTokenExpiry() error {
 		}
 		return nil
 	})
-
 }
 
 func NewRecoveryTokenService(
 	recoveryTokenRepository recovery_tokens_repository.RecoveryTokenRepository,
 	recoveryTokenGenerator token_generator_repository.TokenGenerator,
+	userRepository user_repository.UserRepository,
 
 ) *RecoveryTokenService {
 	return &RecoveryTokenService{
 		recoveryTokenRepository: recoveryTokenRepository,
 		recoveryTokenGenerator:  recoveryTokenGenerator,
+		userRepository:          userRepository,
 	}
 
 }

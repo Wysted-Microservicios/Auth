@@ -16,13 +16,13 @@ const (
 	maxAccessSessionTime = time.Hour * 3
 )
 
-type sessionService struct {
+type SessionService struct {
 	sessionRepository session_repository.SessionRepository
 	accessRepository  access_repository.AccessRepository
 	tokenGenerator    token_generator_repository.TokenGenerator
 }
 
-func (sessionService *sessionService) NewSession(
+func (sessionService *SessionService) NewSession(
 	sessionDto dto.SessionDto,
 	idAuth,
 	idUser int64,
@@ -54,7 +54,7 @@ func (sessionService *sessionService) NewSession(
 	return token, nil
 }
 
-func (sessionService *sessionService) RefreshSession(
+func (sessionService *SessionService) RefreshSession(
 	sessionToken string,
 	idUser int64,
 ) (string, error) {
@@ -78,7 +78,7 @@ func (sessionService *sessionService) RefreshSession(
 	)
 }
 
-func (sessionService *sessionService) GenerateAccess(
+func (sessionService *SessionService) GenerateAccess(
 	sessionToken string,
 	user *model.User,
 ) (string, error) {
@@ -133,7 +133,7 @@ func (sessionService *sessionService) GenerateAccess(
 	return token, err
 }
 
-func (sessionService *sessionService) CheckToken(token string) error {
+func (sessionService *SessionService) CheckToken(token string) error {
 	isNotRevoked := false
 
 	existsToken, err := sessionService.accessRepository.Exists(
@@ -151,7 +151,7 @@ func (sessionService *sessionService) CheckToken(token string) error {
 	return nil
 }
 
-func (sessionService *sessionService) DeleteRevokedTokens() error {
+func (sessionService *SessionService) DeleteRevokedTokens() error {
 	isRevoked := true
 
 	return sessionService.accessRepository.Delete(
@@ -161,7 +161,7 @@ func (sessionService *sessionService) DeleteRevokedTokens() error {
 	)
 }
 
-func (sessionService *sessionService) DeleteExpiredSessions() error {
+func (sessionService *SessionService) DeleteExpiredSessions() error {
 	expired := time.Now()
 
 	return sessionService.sessionRepository.Delete(
@@ -175,8 +175,8 @@ func NewSessionService(
 	sessionRepository session_repository.SessionRepository,
 	accessRepository access_repository.AccessRepository,
 	tokenGenerator token_generator_repository.TokenGenerator,
-) *sessionService {
-	return &sessionService{
+) *SessionService {
+	return &SessionService{
 		sessionRepository: sessionRepository,
 		accessRepository:  accessRepository,
 		tokenGenerator:    tokenGenerator,

@@ -15,6 +15,7 @@ func NewCronRecoveryToken() *CronRecoveryToken {
 		recoveryTokenService: *service.NewRecoveryTokenService(
 			sqlRecoveryTokenRepository,
 			generator,
+			sqlUserRepository,
 		),
 	}
 }

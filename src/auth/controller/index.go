@@ -36,6 +36,7 @@ var (
 	recoveryTokenService = service.NewRecoveryTokenService(
 		sqlRecoveryTokenRepository,
 		generator,
+		sqlUserRepository,
 	)
 	recoveryService = service.NewRecoveryService(
 		sqlRecoveryRepository,
