@@ -9,21 +9,35 @@ services:
       - 8080:8080
     depends_on:
       - nats-js
-      - crdb
+      - pg
+    networks:
+      - micro_services_network
 
   nats-js:
     image: nats:2.10-scratch
     ports:
       - 4222:4222
     command: "-js"
-  crdb:
-    image: cockroachdb/cockroach:v24.2.3
+    networks:
+      - micro_services_network
+  pg:
+    image: postgres:15-alpine
     ports:
-      - "26257:26257"
-      - "8090:8080"
-    command: start-single-node --insecure
+      - 5432:5432
+    container_name: pg
     volumes:
-      - "db:/cockroach/cockroach-data"
+      - "db_pg:/var/lib/postgresql/data"
+    networks:
+      - micro_services_network
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: defaultdb
+
+networks:
+  micro_services_network:
+    external: true
+    driver: bridge
 
 volumes:
-  db:
+  db_pg:

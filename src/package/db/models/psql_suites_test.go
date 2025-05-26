@@ -7,10 +7,16 @@ import "testing"
 
 func TestUpsert(t *testing.T) {
 	t.Run("Accesses", testAccessesUpsert)
+
 	t.Run("Auths", testAuthsUpsert)
+
 	t.Run("RecoveryCodes", testRecoveryCodesUpsert)
+
 	t.Run("RecoveryTokens", testRecoveryTokensUpsert)
+
 	t.Run("RolesUsers", testRolesUsersUpsert)
+
 	t.Run("Sessions", testSessionsUpsert)
+
 	t.Run("Users", testUsersUpsert)
 }

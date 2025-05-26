@@ -35,6 +35,8 @@ var (
 	SESSION_MODEL        string = "model.Session"
 	ACCESS_MODEL         string = "model.Access"
 
+	BUS_EVENT string = "bus.Event"
+
 	STRING_ARRAY string = "[]string"
 	STRING       string = "string"
 	STRING_PTR   string = "*string"
@@ -59,6 +61,7 @@ var (
 	NEW_RECOVERY_CODE_TOKEN string = "NewRecoveryCodeToken"
 	NEW_SESSION_TOKEN       string = "NewSessionToken"
 	NEW_ACCESS_TOKEN        string = "NewAccessToken"
+	PUBLISH                 string = "Publish"
 )
 
 // Datos ficticios para modelos y dto's

@@ -48,6 +48,7 @@ var (
 		sqlUserRepository,
 		*recoveryTokenService,
 		sqlRecoveryTokenRepository,
+		utils.Bus,
 	)
 	sessionService = service.NewSessionService(
 		sqlSessionRepository,

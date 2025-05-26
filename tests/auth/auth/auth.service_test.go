@@ -22,16 +22,18 @@ var mockUserRepo *mocks.MockUserRepository
 var mockTokenGeneratorRepo *mocks.MockTokenGenerator
 var mockRecoveryTokenRepo *mocks.MockRecoveryTokenRepository
 var mockAuthRepo *mocks.MockAuthRepository
+var mockBus *mocks.MockBus
 
 func TestMain(m *testing.M) {
 	mockUserRepo = &mocks.MockUserRepository{}
 	mockTokenGeneratorRepo = &mocks.MockTokenGenerator{}
 	mockRecoveryTokenRepo = &mocks.MockRecoveryTokenRepository{}
 	mockAuthRepo = &mocks.MockAuthRepository{}
+	mockBus = &mocks.MockBus{}
 
 	RecoveryTokenS = service.NewRecoveryTokenService(mockRecoveryTokenRepo, mockTokenGeneratorRepo, mockUserRepo)
 
-	AuthS = service.NewAuthService(mockAuthRepo, mockUserRepo, *RecoveryTokenS, mockRecoveryTokenRepo)
+	AuthS = service.NewAuthService(mockAuthRepo, mockUserRepo, *RecoveryTokenS, mockRecoveryTokenRepo, mockBus)
 
 	code := m.Run()
 	os.Exit(code)
@@ -48,6 +50,7 @@ func TestRegister(t *testing.T) {
 		ExpectedReturns struct {
 			RepoError_1   error
 			RepoError_2   error
+			BusError      error
 			ExpectedError error
 		}
 	}{
@@ -61,6 +64,7 @@ func TestRegister(t *testing.T) {
 			ExpectedReturns: mock_struct.RegisterExpectedReturns{
 				RepoError_1:   nil,
 				RepoError_2:   nil,
+				BusError:      nil,
 				ExpectedError: nil,
 			},
 		},
@@ -74,6 +78,7 @@ func TestRegister(t *testing.T) {
 			ExpectedReturns: mock_struct.RegisterExpectedReturns{
 				RepoError_1:   nil,
 				RepoError_2:   nil,
+				BusError:      nil,
 				ExpectedError: service.ErrExistsEmailOrUsername,
 			},
 		},
@@ -87,6 +92,7 @@ func TestRegister(t *testing.T) {
 			ExpectedReturns: mock_struct.RegisterExpectedReturns{
 				RepoError_1:   utils.ErrRepositoryFailed,
 				RepoError_2:   nil,
+				BusError:      nil,
 				ExpectedError: utils.ErrRepositoryFailed,
 			},
 		},
@@ -100,6 +106,7 @@ func TestRegister(t *testing.T) {
 			ExpectedReturns: mock_struct.RegisterExpectedReturns{
 				RepoError_1:   nil,
 				RepoError_2:   utils.ErrRepositoryFailed,
+				BusError:      nil,
 				ExpectedError: utils.ErrRepositoryFailed,
 			},
 		},
@@ -107,7 +114,7 @@ func TestRegister(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
 			mockUserRepo.ExpectedCalls = nil
-
+			mockBus.ExpectedCalls = nil
 			mockUserRepo.On(tests.EXISTS,
 				mock.AnythingOfType(tests.USER_CRITERIA_PTR),
 			).Return(tc.Repository.Exists, tc.ExpectedReturns.RepoError_1)
@@ -117,9 +124,13 @@ func TestRegister(t *testing.T) {
 				mock.AnythingOfType(tests.STRING),
 			).Return(tc.Repository.InsertOne, tc.ExpectedReturns.RepoError_2)
 
+			mockBus.On(tests.PUBLISH,
+				mock.AnythingOfType(tests.BUS_EVENT),
+			).Return(tc.ExpectedReturns.BusError)
+
 			err := AuthS.Register(tc.RegisterDto)
 			mockUserRepo.AssertExpectations(t)
-
+			mockBus.AssertExpectations(t)
 			assert.Equal(t, tc.ExpectedReturns.ExpectedError, err)
 		})
 	}

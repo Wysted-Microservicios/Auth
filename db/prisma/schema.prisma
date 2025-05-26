@@ -3,12 +3,12 @@ generator client {
 }
 
 datasource db {
-  provider = "cockroachdb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model accesses {
-  id         BigInt   @id @default(sequence())
+  id         BigInt   @id @default(autoincrement())
   token      String
   expires_at DateTime @db.Date
   is_revoked Boolean  @default(false)
@@ -18,7 +18,7 @@ model accesses {
 }
 
 model auths {
-  id         BigInt     @id @default(sequence())
+  id         BigInt     @id @default(autoincrement())
   password   String
   id_user    BigInt     @unique
   created_at DateTime   @default(now()) @db.Timestamp(6)
@@ -27,7 +27,7 @@ model auths {
 }
 
 model roles_users {
-  id         BigInt    @id @default(sequence())
+  id         BigInt    @id @default(autoincrement())
   id_user    BigInt
   role       role_name
   created_at DateTime @default(now()) @db.Timestamp(6)
@@ -35,7 +35,7 @@ model roles_users {
 }
 
 model sessions {
-  id         BigInt     @id @default(sequence())
+  id         BigInt     @id @default(autoincrement())
   token      String
   id_auth    BigInt
   device     String?
@@ -49,7 +49,7 @@ model sessions {
 }
 
 model users {
-  id                BigInt               @id @default(sequence())
+  id                BigInt               @id @default(autoincrement())
   email             String               @unique
   name              String
   username 			String @unique
@@ -62,7 +62,7 @@ model users {
 }
 
 model recovery_codes {
-  id          BigInt    @id @default(sequence())
+  id          BigInt    @id @default(autoincrement())
   code        String
   id_user     BigInt
   is_active   Boolean   @default(true)
@@ -73,7 +73,7 @@ model recovery_codes {
 }
 
 model recovery_tokens {
-  id         BigInt   @id @default(sequence())
+  id         BigInt   @id @default(autoincrement())
   token      String   @unique
   id_user    BigInt
   is_used    Boolean  @default(false)

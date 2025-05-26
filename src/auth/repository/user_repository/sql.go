@@ -41,7 +41,7 @@ func (sqlUR sqlUserRepository) getUserRoles(user *models.User) ([]string, error)
 	}
 
 	return utils.MapNoError(roles, func(role *models.RolesUser) string {
-		return role.Role
+		return string(role.Role)
 	}), nil
 }
 
@@ -177,7 +177,7 @@ func (sqlUR sqlUserRepository) InsertOne(user *model.User, password string) (*mo
 	for _, role := range user.Roles {
 		sqlRole := models.RolesUser{
 			IDUser: sqlUser.ID,
-			Role:   string(role),
+			Role:   models.RoleName(role),
 		}
 		if err := sqlRole.Insert(ctx, tx, boil.Infer()); err != nil {
 

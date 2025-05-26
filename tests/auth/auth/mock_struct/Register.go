@@ -10,5 +10,6 @@ type RegisterRepository struct {
 type RegisterExpectedReturns struct {
 	RepoError_1   error
 	RepoError_2   error
+	BusError      error
 	ExpectedError error
 }

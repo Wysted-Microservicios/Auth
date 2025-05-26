@@ -1,11 +1,14 @@
 package service
 
 import (
+	"encoding/json"
+
 	"github.com/CPU-commits/Template_Go-EventDriven/src/auth/dto"
 	"github.com/CPU-commits/Template_Go-EventDriven/src/auth/model"
 	"github.com/CPU-commits/Template_Go-EventDriven/src/auth/repository/auth_repository"
 	"github.com/CPU-commits/Template_Go-EventDriven/src/auth/repository/recovery_tokens_repository"
 	"github.com/CPU-commits/Template_Go-EventDriven/src/auth/repository/user_repository"
+	"github.com/CPU-commits/Template_Go-EventDriven/src/package/bus"
 	"github.com/CPU-commits/Template_Go-EventDriven/src/utils"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -15,6 +18,7 @@ type AuthService struct {
 	userRepository          user_repository.UserRepository
 	recoveryTokenService    RecoveryTokenService
 	recoteryTokenRepository recovery_tokens_repository.RecoveryTokenRepository
+	bus                     bus.Bus
 }
 
 func (authService *AuthService) Register(
@@ -40,8 +44,27 @@ func (authService *AuthService) Register(
 	if err != nil {
 		return err
 	}
-	_, err = authService.userRepository.InsertOne(user, registerDto.Password)
-	return err
+	user, err = authService.userRepository.InsertOne(user, registerDto.Password)
+	if err != nil {
+		return err
+	}
+
+	payload := map[string]interface{}{
+		"id":       user.ID,
+		"name":     user.Name,
+		"username": user.Username,
+		"email":    user.Email,
+	}
+
+	data, _ := json.Marshal(payload)
+	err = authService.bus.Publish(bus.Event{
+		Name:    REGISTER_EVENT,
+		Payload: data,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (authService *AuthService) Login(authDto dto.AuthDto) (*model.User, int64, error) {
@@ -99,6 +122,7 @@ func NewAuthService(
 	userRepository user_repository.UserRepository,
 	recoveryTokenService RecoveryTokenService,
 	recoteryTokenRepository recovery_tokens_repository.RecoveryTokenRepository,
+	bus bus.Bus,
 
 ) *AuthService {
 	return &AuthService{
@@ -106,5 +130,6 @@ func NewAuthService(
 		userRepository:          userRepository,
 		recoveryTokenService:    recoveryTokenService,
 		recoteryTokenRepository: recoteryTokenRepository,
+		bus:                     bus,
 	}
 }
